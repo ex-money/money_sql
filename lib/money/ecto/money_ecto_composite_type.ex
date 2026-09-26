@@ -189,27 +189,11 @@ if Code.ensure_loaded?(Ecto.Type) do
     end
 
     def cast(%{"currency" => currency, "amount" => amount}, params)
-        when (is_binary(currency) or is_atom(currency)) and is_integer(amount) do
-      case Money.new(currency, amount, params) do
-        %Money{} = money -> {:ok, money}
-        {:error, {exception, message}} -> {:error, exception: exception, message: message}
-      end
-    end
-
-    def cast(%{"currency" => currency, "amount" => amount}, params)
-        when (is_binary(currency) or is_atom(currency)) and is_binary(amount) do
-      case Money.new(currency, amount, params) do
-        %Money{} = money -> {:ok, money}
-        {:error, {exception, message}} -> {:error, exception: exception, message: message}
-      end
-    end
-
-    def cast(%{"currency" => currency, "amount" => %Decimal{} = amount}, params)
-        when is_binary(currency) or is_atom(currency) do
-      case Money.new(currency, amount, params) do
-        %Money{} = money -> {:ok, money}
-        {:error, {exception, message}} -> {:error, exception: exception, message: message}
-      end
+        when (is_binary(currency) or is_atom(currency)) and
+               (is_integer(amount) or is_binary(amount) or is_struct(amount, Decimal)) do
+      currency
+      |> Money.new(amount, params)
+      |> cast_result()
     end
 
     def cast(%{currency: currency, amount: amount}, params) do
@@ -217,15 +201,24 @@ if Code.ensure_loaded?(Ecto.Type) do
     end
 
     def cast(string, params) when is_binary(string) do
-      case Money.parse(string, params) do
-        {:error, {exception, message}} -> {:error, exception: exception, message: message}
-        money -> {:ok, money}
-      end
+      string
+      |> Money.parse(params)
+      |> cast_result()
     end
 
     def cast(_money, _params) do
       :error
     end
+
+    # Money returns `{:error, {module, message}}` for its own errors and
+    # `{:error, exception}` for errors from Localize, such as an invalid locale.
+    defp cast_result(%Money{} = money), do: {:ok, money}
+
+    defp cast_result({:error, {exception, message}}),
+      do: {:error, exception: exception, message: message}
+
+    defp cast_result({:error, exception}) when is_exception(exception),
+      do: {:error, exception: exception.__struct__, message: Exception.message(exception)}
 
     # embed_as is set to :dump because if it is set to
     # `:self` then `cast/2` will be called when loading. And

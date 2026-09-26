@@ -70,6 +70,27 @@ defmodule Money.Ecto.EdgeCaseTest do
       assert Composite.cast(nil, @params) == {:ok, nil}
       assert Composite.cast(42, @params) == :error
     end
+
+    test "an invalid locale is a cast error for \"100 CHF\" and a CHF 100 map" do
+      params = Composite.init(locale: "!invalid!")
+
+      for type <- [Composite, Map],
+          input <- [
+            "100 CHF",
+            %{"currency" => "CHF", "amount" => "100"},
+            %{currency: :CHF, amount: "100"}
+          ] do
+        assert {:error, exception: Localize.InvalidLocaleError, message: message} =
+                 type.cast(input, params)
+
+        assert message =~ "!invalid!"
+      end
+    end
+
+    test "an unknown currency XYZ is still a cast error" do
+      assert {:error, exception: Money.UnknownCurrencyError, message: _} =
+               Composite.cast(%{"currency" => "XYZ", "amount" => "1"}, @params)
+    end
   end
 
   describe "composite type equality and embedding" do
