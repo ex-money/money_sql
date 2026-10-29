@@ -24,3 +24,5 @@ money_sql-*.tar
 
 .DS_Store
 
+# Claude Code session context (local only)
+CLAUDE.local.md

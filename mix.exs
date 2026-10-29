@@ -1,7 +1,7 @@
 defmodule Money.Sql.Mixfile do
   use Mix.Project
 
-  @version "2.1.0"
+  @version "2.2.0"
   @source_url "https://github.com/ex-money/money_sql"
 
   def project do
@@ -84,7 +84,19 @@ defmodule Money.Sql.Mixfile do
       main: "readme",
       logo: "logo.png",
       skip_undefined_reference_warnings_on: ["CHANGELOG.md", "README.md"],
-      formatters: ["html", "markdown"]
+      formatters: ["html", "markdown"],
+      groups_for_modules: groups_for_modules()
+    ]
+  end
+
+  defp groups_for_modules do
+    [
+      "Ecto types": [Money.Ecto.Composite.Type, Money.Ecto.Map.Type],
+      "Query API": [Money.Ecto.Query.API],
+      Changesets: [Money.Validate],
+      Migrations: [Money.DDL, Money.Migration],
+      JSON: [Money.SQL.JSON],
+      "Mix tasks": ~r/^Mix.Tasks.Money./
     ]
   end
 
@@ -96,8 +108,8 @@ defmodule Money.Sql.Mixfile do
 
   defp deps do
     [
-      {:ex_money, "~> 6.2"},
-      {:localize_sql, "~> 1.0"},
+      {:ex_money, "~> 6.3"},
+      {:localize_sql, "~> 1.1"},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.18", only: :test},

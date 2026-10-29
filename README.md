@@ -27,7 +27,7 @@ Money_SQL implements a set of functions to store and retrieve data structured as
 ```elixir
 def deps do
   [
-    {:ex_money_sql, "~> 2.1"},
+    {:ex_money_sql, "~> 2.2"},
     ...
   ]
 end
@@ -395,3 +395,6 @@ Since `:money_with_currency` is a composite type, the default `order_by` results
 ```
 **Note** that the results may still be unexpected.  The example above shows the correct ascending ordering by `amount(price)` however the ordering is not currency code aware and therefore mixed currencies will return a largely meaningless order.
 
+## License
+
+Money SQL is released under the Apache License, Version 2.0. See [LICENSE.md](https://github.com/ex-money/money_sql/blob/v2.2.0/LICENSE.md).

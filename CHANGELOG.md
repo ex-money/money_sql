@@ -2,9 +2,13 @@
 
 **Note** That `money_sql` is supported on Elixir 1.17 and later only.
 
-## Money_SQL v2.1.1
+## Money_SQL v2.2.0
 
-This is the changelog for Money_SQL v2.1.1 released on October 30th, 2026.
+This is the changelog for Money_SQL v2.2.0 released on October 30th, 2026.
+
+### Changed
+
+* Requires `ex_money ~> 6.3`, which reads money strings with Localize 1.5, and `localize_sql ~> 1.1`. The database types and the generated SQL are unchanged, so no migration is needed.
 
 ### Fixed
 
