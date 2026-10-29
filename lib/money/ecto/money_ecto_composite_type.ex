@@ -190,26 +190,17 @@ if Code.ensure_loaded?(Ecto.Type) do
 
     def cast(%{"currency" => currency, "amount" => amount}, params)
         when (is_binary(currency) or is_atom(currency)) and is_integer(amount) do
-      case Money.new(currency, amount, params) do
-        %Money{} = money -> {:ok, money}
-        {:error, {exception, message}} -> {:error, exception: exception, message: message}
-      end
+      cast_result(Money.new(currency, amount, params))
     end
 
     def cast(%{"currency" => currency, "amount" => amount}, params)
         when (is_binary(currency) or is_atom(currency)) and is_binary(amount) do
-      case Money.new(currency, amount, params) do
-        %Money{} = money -> {:ok, money}
-        {:error, {exception, message}} -> {:error, exception: exception, message: message}
-      end
+      cast_result(Money.new(currency, amount, params))
     end
 
     def cast(%{"currency" => currency, "amount" => %Decimal{} = amount}, params)
         when is_binary(currency) or is_atom(currency) do
-      case Money.new(currency, amount, params) do
-        %Money{} = money -> {:ok, money}
-        {:error, {exception, message}} -> {:error, exception: exception, message: message}
-      end
+      cast_result(Money.new(currency, amount, params))
     end
 
     def cast(%{currency: currency, amount: amount}, params) do
@@ -217,14 +208,27 @@ if Code.ensure_loaded?(Ecto.Type) do
     end
 
     def cast(string, params) when is_binary(string) do
-      case Money.parse(string, params) do
-        {:error, {exception, message}} -> {:error, exception: exception, message: message}
-        money -> {:ok, money}
-      end
+      cast_result(Money.parse(string, params))
     end
 
     def cast(_money, _params) do
       :error
+    end
+
+    # `Money.new/3` and `Money.parse/2` return Money's own errors as
+    # `{:error, {module, message}}` and Localize's, such as an invalid
+    # locale or a locale whose data is not installed, as the exception
+    # struct itself. Both become a changeset error naming the exception.
+    defp cast_result(%Money{} = money) do
+      {:ok, money}
+    end
+
+    defp cast_result({:error, {exception, message}}) do
+      {:error, exception: exception, message: message}
+    end
+
+    defp cast_result({:error, %{__exception__: true} = exception}) do
+      {:error, exception: exception.__struct__, message: Exception.message(exception)}
     end
 
     # embed_as is set to :dump because if it is set to

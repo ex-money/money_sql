@@ -2,6 +2,14 @@
 
 **Note** That `money_sql` is supported on Elixir 1.17 and later only.
 
+## Money_SQL v2.1.1
+
+This is the changelog for Money_SQL v2.1.1 released on October 30th, 2026.
+
+### Fixed
+
+* `Money.Ecto.Composite.Type.cast/2` and `Money.Ecto.Map.Type.cast/2` return a changeset error for an error `Money.new/3` or `Money.parse/2` returns as an exception struct, such as an invalid `:locale` or, with ex_money 6.3, a locale whose data is not installed. They raised `CaseClauseError`, since they matched only Money's `{module, message}` tuples.
+
 ## Money_SQL v2.1.0
 
 This is the changelog for Money_SQL v2.1.0 released on July 31st, 2026.

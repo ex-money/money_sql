@@ -70,6 +70,21 @@ defmodule Money.Ecto.EdgeCaseTest do
       assert Composite.cast(nil, @params) == {:ok, nil}
       assert Composite.cast(42, @params) == :error
     end
+
+    # Money returns Localize's errors as the exception struct, not as a
+    # `{module, message}` tuple: an invalid locale, or a locale whose data
+    # is not installed. Each is a changeset error, never a crash.
+    test "an error Money returns as an exception struct is a changeset error" do
+      params = [locale: "zz-ZZZZ"]
+
+      assert {:error, exception: Localize.InvalidLocaleError, message: message} =
+               Composite.cast(%{"currency" => "USD", "amount" => "100"}, params)
+
+      assert is_binary(message)
+
+      assert {:error, exception: Localize.InvalidLocaleError, message: _} =
+               Composite.cast("USD 100", params)
+    end
   end
 
   describe "composite type equality and embedding" do
